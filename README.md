@@ -2,20 +2,18 @@
 
 Implements a [GitHub
 Action](https://help.github.com/en/categories/automating-your-workflow-with-github-actions)
-that performs actions on Issues and/or Pull Requests based on configurable conditions.
+that performs actions on issues and/or pull requests based on configurable conditions.
 
-At the moment it provides a single functionality to auto-label all new pull requests
-
+At the moment it provides a single functionality to auto-label new issues and new pull requests.
 
 ## Installing
 
-Add a .github/workflows/main.yml file to your repository with these
+Add a `.github/workflows/main.yml` file to your repository with these
 contents:
 
 	name: Virutal Assistant
 
-	on:
-	  - pull_request
+	on: [issues, pull_request]
 
 	jobs:
 	  build:
@@ -23,7 +21,7 @@ contents:
 		runs-on: ubuntu-latest
 		
 		steps:
-		- uses: ppapapetrou76/virtual-assistant@master
+		- uses: ppapapetrou76/virtual-assistant@0.1
 		  env:
 			GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
