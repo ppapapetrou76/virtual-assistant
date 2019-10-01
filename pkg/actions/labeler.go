@@ -28,13 +28,27 @@ func (l *Labeler) HandleEvent(eventName string, payload *[]byte) error {
 	case *gh.PullRequestEvent:
 		err = l.runOn(event.PullRequest)
 	case *gh.IssuesEvent:
-		//		TODO : Implement Issue auto-labeler
+		err = l.runOnIssue(event.Issue)
 	}
 	return err
 }
 
 func (l *Labeler) runOn(pr *gh.PullRequest) error {
-	pullRequest := github.NewPullRequest(l.Repo, *pr.Number)
+	pullRequest := github.NewIssue(l.Repo, *pr.Number)
+	currLabels, err := pullRequest.CurrentLabels()
+
+	if err != nil {
+		return err
+	}
+
+	desiredLabels := append(l.Labels, currLabels...)
+	log.Printf("Desired labels: %s", desiredLabels)
+	return pullRequest.ReplaceLabels(desiredLabels)
+}
+
+
+func (l *Labeler) runOnIssue(i *gh.Issue) error {
+	pullRequest := github.NewIssue(l.Repo, *i.Number)
 	currLabels, err := pullRequest.CurrentLabels()
 
 	if err != nil {

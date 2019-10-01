@@ -62,7 +62,7 @@ func TestPullRequest_CurrentLabels(t *testing.T) {
 				Name:     "virtual-assistant",
 			}
 
-			pr := PullRequest{
+			pr := Issue{
 				Repo:   repo,
 				Number: 0,
 			}
@@ -88,7 +88,7 @@ func TestNewPullRequest(t *testing.T) {
 	tests := []struct {
 		name     string
 		args     args
-		expected PullRequest
+		expected Issue
 	}{
 		{
 			name: "should return a new repo",
@@ -96,7 +96,7 @@ func TestNewPullRequest(t *testing.T) {
 				repo:   repo,
 				number: 123,
 			},
-			expected: PullRequest{
+			expected: Issue{
 				Repo:   repo,
 				Number: 123,
 			},
@@ -104,7 +104,7 @@ func TestNewPullRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			actual := NewPullRequest(tt.args.repo, tt.args.number)
+			actual := NewIssue(tt.args.repo, tt.args.number)
 
 			if !reflect.DeepEqual(actual, tt.expected) {
 				t.Errorf("Expect: \n%+v Got: \n%+v", tt.expected, actual)
@@ -155,7 +155,7 @@ func TestPullRequest_ReplaceLabels(t *testing.T) {
 				Name:     "virtual-assistant",
 			}
 
-			pr := PullRequest{
+			pr := Issue{
 				Repo:   repo,
 				Number: 0,
 			}
