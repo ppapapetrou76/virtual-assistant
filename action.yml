@@ -1,0 +1,13 @@
+name: 'Issue and Pull Request virtual assistant'
+description: 'Automates tasks on pull requests and issues actions'
+author: 'Patroklos Papapetrou <ppapapetrou76@gmail.com>'
+inputs:
+  config_path:
+    description: 'Path for rules'
+    default: '.github/virtual-assistant.yml'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+branding:
+  icon: award
+  color: blue
