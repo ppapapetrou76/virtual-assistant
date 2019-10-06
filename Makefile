@@ -58,7 +58,7 @@ lint: deps
 	@ echo "-> Running linters..."
 	@ $(GOBIN)/golint -set_exit_status ./...
 	@ $(GOBIN)/golangci-lint run
-	@ echo "-> Done..."
+	@ echo "-> Done."
 
 ## Run unit tests
 test:
