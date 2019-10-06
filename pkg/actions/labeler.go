@@ -4,6 +4,7 @@ import (
 	"log"
 
 	gh "github.com/google/go-github/v27/github"
+	"github.com/hashicorp/go-multierror"
 
 	"github.com/ppapapetrou76/virtual-assistant/pkg/config"
 	"github.com/ppapapetrou76/virtual-assistant/pkg/github"
@@ -41,23 +42,27 @@ func (l *Labeler) runOn(pr *gh.PullRequest) error {
 		return err
 	}
 
-	desiredLabels := append(l.Labels, currLabels...)
+	desiredLabels := append(l.PullRequestsConfig.Labels, currLabels...)
 	log.Printf("Desired labels: %s", desiredLabels)
 	return pullRequest.ReplaceLabels(desiredLabels)
 }
 
-
 func (l *Labeler) runOnIssue(i *gh.Issue) error {
-	pullRequest := github.NewIssue(l.Repo, *i.Number)
-	currLabels, err := pullRequest.CurrentLabels()
+	issue := github.NewIssue(l.Repo, *i.Number)
+	currLabels, err := issue.CurrentLabels()
 
 	if err != nil {
 		return err
 	}
 
-	desiredLabels := append(l.Labels, currLabels...)
+	desiredLabels := append(l.IssuesConfig.Labels, currLabels...)
 	log.Printf("Desired labels: %s", desiredLabels)
-	return pullRequest.ReplaceLabels(desiredLabels)
+
+	merr := new(multierror.Error)
+	merr = multierror.Append(merr, issue.ReplaceLabels(desiredLabels))
+	merr = multierror.Append(merr, issue.AtLeastOne(l.IssuesConfig.PossibleLabels, l.IssuesConfig.Default))
+
+	return merr.ErrorOrNil()
 }
 
 // New creates a new labeler object

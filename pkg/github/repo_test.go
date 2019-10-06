@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	testutil "github.com/ppapapetrou76/virtual-assistant/pkg/util"
+	"github.com/ppapapetrou76/virtual-assistant/pkg/testutil"
 )
 
 func TestNewRepo(t *testing.T) {

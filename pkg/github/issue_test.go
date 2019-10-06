@@ -5,7 +5,9 @@ import (
 	"reflect"
 	"testing"
 
-	testutil "github.com/ppapapetrou76/virtual-assistant/pkg/util"
+	"github.com/ppapapetrou76/virtual-assistant/pkg/util/slices"
+
+	"github.com/ppapapetrou76/virtual-assistant/pkg/testutil"
 )
 
 const listIssueLabelsResponse = `[
@@ -27,7 +29,7 @@ const listIssueLabelsResponse = `[
   }
 ]`
 
-func TestPullRequest_CurrentLabels(t *testing.T) {
+func TestIssue_CurrentLabels(t *testing.T) {
 	type fields struct {
 		ghClient ClientWrapper
 	}
@@ -36,7 +38,7 @@ func TestPullRequest_CurrentLabels(t *testing.T) {
 		fields         fields
 		wantErr        bool
 		expectedError  error
-		expectedLabels []string
+		expectedLabels slices.StringSlice
 	}{
 		{
 			name: "should return the issue labels",
@@ -76,7 +78,7 @@ func TestPullRequest_CurrentLabels(t *testing.T) {
 	}
 }
 
-func TestNewPullRequest(t *testing.T) {
+func TestNewIssue(t *testing.T) {
 	repo := Repo{
 		Owner: "ppapapetrou76",
 		Name:  "virtual-assistant",
@@ -113,7 +115,7 @@ func TestNewPullRequest(t *testing.T) {
 	}
 }
 
-func TestPullRequest_ReplaceLabels(t *testing.T) {
+func TestIssue_ReplaceLabels(t *testing.T) {
 	type fields struct {
 		ghClient ClientWrapper
 	}
@@ -160,6 +162,95 @@ func TestPullRequest_ReplaceLabels(t *testing.T) {
 				Number: 0,
 			}
 			err := pr.ReplaceLabels(tt.args.labels)
+			testutil.AssertError(t, tt.wantErr, tt.expectedError, err)
+		})
+	}
+}
+
+func TestIssue_AtLeastOne(t *testing.T) {
+	type fields struct {
+		ghClient ClientWrapper
+	}
+	type args struct {
+		labels       slices.StringSlice
+		defaultLabel string
+	}
+	tests := []struct {
+		name           string
+		fields         fields
+		args           args
+		wantErr        bool
+		expectedError  error
+		expectedLabels []string
+	}{
+		{
+			name: "should do nothing if labels group is empty",
+			args: args{
+				labels:       []string{},
+				defaultLabel: "label1",
+			},
+			fields: fields{
+				ghClient: MockGithubClient(200, listIssueLabelsResponse),
+			},
+		},
+		{
+			name: "should do nothing if default label is missing",
+			args: args{
+				labels: []string{"label1"},
+			},
+			fields: fields{
+				ghClient: MockGithubClient(200, listIssueLabelsResponse),
+			},
+		},
+		{
+			name: "should error if current labels cannot be retrieved",
+			args: args{
+				labels:       []string{"label1", "label2"},
+				defaultLabel: "label1",
+			},
+			fields: fields{
+				ghClient: MockGithubClient(401, `{
+				  "message": "Bad credentials",
+  				  "documentation_url": "https://developer.github.com/v3"
+				}`),
+			},
+			expectedError: errors.New("GET https://api.github.com/repos/ppapapetrou76/virtual-assistant/issues/0/labels: 401 Bad credentials []"),
+			wantErr:       true,
+		},
+		{
+			name: "should do nothing if one of the labels group is already assigned to the github issue",
+			args: args{
+				labels:       []string{"bug", "label2"},
+				defaultLabel: "label1",
+			},
+			fields: fields{
+				ghClient: MockGithubClient(200, listIssueLabelsResponse),
+			},
+		},
+		{
+			name: "should add default label none of the labels group is assigned to the github issue",
+			args: args{
+				labels:       []string{"label1", "label2"},
+				defaultLabel: "label1",
+			},
+			fields: fields{
+				ghClient: MockGithubClient(200, listIssueLabelsResponse),
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := Repo{
+				GHClient: tt.fields.ghClient,
+				Owner:    "ppapapetrou76",
+				Name:     "virtual-assistant",
+			}
+
+			pr := Issue{
+				Repo:   repo,
+				Number: 0,
+			}
+			err := pr.AtLeastOne(tt.args.labels, tt.args.defaultLabel)
 			testutil.AssertError(t, tt.wantErr, tt.expectedError, err)
 		})
 	}

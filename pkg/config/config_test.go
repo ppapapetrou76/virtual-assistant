@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-yaml/yaml"
 
-	testutil "github.com/ppapapetrou76/virtual-assistant/pkg/util"
+	"github.com/ppapapetrou76/virtual-assistant/pkg/testutil"
 )
 
 func TestLoad(t *testing.T) {
@@ -33,10 +33,26 @@ func TestLoad(t *testing.T) {
 				fileName: "../../test_data/valid-config.yml",
 			},
 			expected: &Config{
-				Labels: []string{
-					"label1",
-					"label2",
-					"area:label3",
+				IssuesConfig: IssuesConfig{
+					Labels: []string{
+						"label1",
+						"label2",
+						"area:label3",
+					},
+					OneOfaKind: OneOfaKind{
+						PossibleLabels: []string{
+							"priority:1",
+							"priority:2",
+							"priority:3",
+						},
+						Default: "priority:2",
+					},
+				},
+				PullRequestsConfig: PullRequestsConfig{
+					Labels: []string{
+						"label1",
+						"label2",
+					},
 				},
 			},
 		},

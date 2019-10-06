@@ -30,16 +30,45 @@ below.
 
 ## Configuration
 
-Configuration can be stored at `./github/virtual-assistant.yml` as a plain list of labels
+Configuration can be stored at `./github/virtual-assistant.yml` as below
 
-    labels:
-      - <label1>
-      - <label2>
+    issues:
+          labels:
+                - label1
+                - label2
+                - area:label3
+          at-least-one:
+                labels:
+                      - priority:1
+                      - priority:2
+                      - priority:3
+                default: priority:2
+    pull-requests:
+          labels:
+                - label1
+                - label2
+
 
 
 For example, given this `./github/virtual-assistant.yml`:
 
-      labels:
-            - label1
-            - label2
-            - area:label3
+      issues:
+           labels:
+                - label1
+                - label2
+                - area:label3
+           at-least-one:
+                labels:
+                      - priority:1
+                      - priority:2
+                      - priority:3
+                default: priority:2
+      pull-requests:
+           labels:
+                - label1
+                - label2
+
+the action will 
+- add to all new pull request the labels : `label1` and `label2`
+- add to all new issues the labels : `label1`,`label2` and `area:label3`
+- check all new issues if at least one of the labels `priority:1`,`priority:2`,`priority:3` exists and if not it will add the label `priority:2`

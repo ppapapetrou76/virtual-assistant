@@ -5,11 +5,30 @@ import (
 	"log"
 
 	"github.com/go-yaml/yaml"
+
+	"github.com/ppapapetrou76/virtual-assistant/pkg/util/slices"
 )
 
 // Config is the struct to hold user configuration
 type Config struct {
-	Labels []string
+	IssuesConfig       `yaml:"issues"`
+	PullRequestsConfig `yaml:"pull-requests"`
+}
+
+// IssuesConfig is the struct to hold user configuration related to issues
+type IssuesConfig struct {
+	Labels     slices.StringSlice
+	OneOfaKind `yaml:"at-least-one"`
+}
+
+type OneOfaKind struct {
+	PossibleLabels slices.StringSlice `yaml:"labels"`
+	Default        string
+}
+
+// PullRequestsConfig is the struct to hold user configuration related to pull-requests
+type PullRequestsConfig struct {
+	Labels slices.StringSlice
 }
 
 // Load loads config data from raw format to a Config struct

@@ -6,7 +6,7 @@ import (
 
 	"github.com/ppapapetrou76/virtual-assistant/pkg/config"
 	"github.com/ppapapetrou76/virtual-assistant/pkg/github"
-	testutil "github.com/ppapapetrou76/virtual-assistant/pkg/util"
+	"github.com/ppapapetrou76/virtual-assistant/pkg/testutil"
 )
 
 const webhookPayload = `{
@@ -23,13 +23,25 @@ const webhookPayload = `{
    }
 }`
 
+const webhookIssuePayload = `
+{
+  "action": "opened",
+  "issue": {
+    "id": 444500041,
+    "node_id": "MDU6SXNzdWU0NDQ1MDAwNDE=",
+    "number": 1,
+    "title": "Some random issue"
+  }
+}`
+
 func TestLabeler_HandleEvent(t *testing.T) {
 	type fields struct {
 		repo github.Repo
 	}
 	type args struct {
-		labels  []string
-		payload []byte
+		labels    []string
+		payload   []byte
+		eventName string
 	}
 	tests := []struct {
 		name           string
@@ -42,10 +54,12 @@ func TestLabeler_HandleEvent(t *testing.T) {
 		{
 			name: "should handle a pr event",
 			args: args{
-				labels:  []string{"bug", "enhancement"},
-				payload: []byte(webhookPayload),
+				labels:    []string{"bug", "enhancement"},
+				payload:   []byte(webhookPayload),
+				eventName: "pull_request",
 			},
 			fields: fields{
+
 				repo: github.Repo{
 					GHClient: github.MockGithubClient(200, ""),
 					Owner:    "ppapapetrou76",
@@ -54,10 +68,27 @@ func TestLabeler_HandleEvent(t *testing.T) {
 			},
 		},
 		{
-			name: "should return error if action run fails",
+			name: "should handle an issue event",
 			args: args{
-				labels:  []string{"bug", "enhancement"},
-				payload: []byte(webhookPayload),
+				labels:    []string{"bug", "enhancement"},
+				payload:   []byte(webhookIssuePayload),
+				eventName: "issues",
+			},
+			fields: fields{
+
+				repo: github.Repo{
+					GHClient: github.MockGithubClient(200, ""),
+					Owner:    "ppapapetrou76",
+					Name:     "virtual-assistant",
+				},
+			},
+		},
+		{
+			name: "should return error if event is pull request and fetching current label fails",
+			args: args{
+				labels:    []string{"bug", "enhancement"},
+				payload:   []byte(webhookPayload),
+				eventName: "pull_request",
 			},
 			fields: fields{
 				repo: github.Repo{
@@ -73,12 +104,34 @@ func TestLabeler_HandleEvent(t *testing.T) {
 			expectedError: errors.New("GET https://api.github.com/repos/ppapapetrou76/virtual-assistant/issues/2/labels: 401 Bad credentials []"),
 		},
 		{
-			name: "should return error parsing webhook",
+			name: "should return error if event is issue and fetching current label fails",
 			args: args{
-				labels:  []string{"bug", "enhancement"},
-				payload: []byte("random payload"),
+				labels:    []string{"bug", "enhancement"},
+				payload:   []byte(webhookIssuePayload),
+				eventName: "issues",
 			},
 			fields: fields{
+				repo: github.Repo{
+					GHClient: github.MockGithubClient(401, `{
+						  "message": "Bad credentials",
+						  "documentation_url": "https://developer.github.com/v3"
+						}`),
+					Owner: "ppapapetrou76",
+					Name:  "virtual-assistant",
+				},
+			},
+			wantErr:       true,
+			expectedError: errors.New("GET https://api.github.com/repos/ppapapetrou76/virtual-assistant/issues/1/labels: 401 Bad credentials []"),
+		},
+		{
+			name: "should return error parsing webhook",
+			args: args{
+				labels:    []string{"bug", "enhancement"},
+				payload:   []byte("random payload"),
+				eventName: "pull_request",
+			},
+			fields: fields{
+
 				repo: github.Repo{
 					GHClient: github.MockGithubClient(200, ""),
 					Owner:    "ppapapetrou76",
@@ -92,10 +145,17 @@ func TestLabeler_HandleEvent(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			labeler := Labeler{
-				Config: &config.Config{Labels: []string{"bug"}},
-				Repo:   tt.fields.repo,
+				Config: &config.Config{
+					PullRequestsConfig: config.PullRequestsConfig{
+						Labels: []string{"bug"},
+					},
+					IssuesConfig: config.IssuesConfig{
+						Labels: []string{"feature"},
+					},
+				},
+				Repo: tt.fields.repo,
 			}
-			err := labeler.HandleEvent("pull_request", &tt.args.payload)
+			err := labeler.HandleEvent(tt.args.eventName, &tt.args.payload)
 			testutil.AssertError(t, tt.wantErr, tt.expectedError, err)
 		})
 	}

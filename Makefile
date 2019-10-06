@@ -63,6 +63,6 @@ lint: deps
 ## Run unit tests
 test:
 	@ echo "-> Running unit tests..."
-	@ go test -timeout 10s -p 4 -race -count=1 ./pkg/*
+	@ go test -timeout 10s -p 4 -race -count=1 ./...
 	@ echo "-> Done."
 

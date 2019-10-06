@@ -6,6 +6,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: ppapapetrou76/virtual-assistant@0.1
+    - uses: ppapapetrou76/virtual-assistant@master
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
