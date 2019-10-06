@@ -25,10 +25,19 @@ func (l *Labeler) HandleEvent(eventName string, payload *[]byte) error {
 	if err != nil {
 		return err
 	}
+
 	switch event := event.(type) {
 	case *gh.PullRequestEvent:
+		if *event.Action != "opened" {
+			log.Printf("Pull request event is `%s`. Skipping issues labeler", *event.Action)
+			return nil
+		}
 		err = l.runOn(event.PullRequest)
 	case *gh.IssuesEvent:
+		if *event.Action != "opened" {
+			log.Printf("Issues event is `%s`. Skipping issues labeler", *event.Action)
+			return nil
+		}
 		err = l.runOnIssue(event.Issue)
 	}
 	return err
