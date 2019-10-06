@@ -21,6 +21,8 @@ type IssuesConfig struct {
 	OneOfaKind `yaml:"at-least-one"`
 }
 
+// OneOfaKind is the struct to hold user configuration related to the feature of checking the existence of at least
+// one label of a group and if it doesn't exist then add a default label
 type OneOfaKind struct {
 	PossibleLabels slices.StringSlice `yaml:"labels"`
 	Default        string
