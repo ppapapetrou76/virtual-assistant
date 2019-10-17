@@ -3,6 +3,9 @@ issues:
     - label1
     - label2
     - area:label3
+  actions:
+    - milestoned
+    - opened
   at-least-one:
     labels:
       - priority:1
@@ -14,3 +17,6 @@ pull-requests:
   labels:
     - label1
     - label2
+  actions:
+    - opened
+    - synchronize
