@@ -39,6 +39,10 @@ func TestLoad(t *testing.T) {
 						"label2",
 						"area:label3",
 					},
+					Actions: []string{
+						"opened",
+						"milestoned",
+					},
 					OneOfaKind: OneOfaKind{
 						PossibleLabels: []string{
 							"priority:1",
@@ -52,6 +56,10 @@ func TestLoad(t *testing.T) {
 					Labels: []string{
 						"label1",
 						"label2",
+					},
+					Actions: []string{
+						"opened",
+						"synchronize",
 					},
 				},
 			},

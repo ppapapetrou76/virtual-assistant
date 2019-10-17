@@ -68,3 +68,38 @@ func TestStringSlice_HasString(t *testing.T) {
 		})
 	}
 }
+
+func TestStringSlice_ContainsAny(t *testing.T) {
+	type fields struct {
+		slice StringSlice
+	}
+	type args struct {
+		elements StringSlice
+	}
+	tests := []struct {
+		name     string
+		expected bool
+		fields   fields
+		args     args
+	}{
+		{
+			name:     "should return true if slice contains any of the given elements",
+			fields:   fields{slice: StringSlice{"value", "anothervalue"}},
+			expected: true,
+			args:     args{elements: StringSlice{"value"}},
+		},
+		{
+			name:   "should return false if slice doesn't contain any of the given elements",
+			fields: fields{slice: StringSlice{"value", "anothervalue"}},
+			args:   args{elements: StringSlice{"random"}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := tt.fields.slice.ContainsAny(tt.args.elements...)
+			if !reflect.DeepEqual(actual, tt.expected) {
+				t.Errorf("Expect: \n%+v Got: \n%+v", tt.expected, actual)
+			}
+		})
+	}
+}

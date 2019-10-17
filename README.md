@@ -11,7 +11,7 @@ At the moment it provides a single functionality to auto-label new issues and ne
 Add a `.github/workflows/main.yml` file to your repository with these
 contents:
 
-	name: Virutal Assistant
+	name: Virtual Assistant
 
 	on: [issues, pull_request]
 

@@ -3,6 +3,8 @@ package labeler
 import (
 	"log"
 
+	"github.com/ppapapetrou76/virtual-assistant/pkg/util/slices"
+
 	gh "github.com/google/go-github/v27/github"
 	"github.com/hashicorp/go-multierror"
 
@@ -25,10 +27,29 @@ func (l *Labeler) HandleEvent(eventName string, payload *[]byte) error {
 	if err != nil {
 		return err
 	}
+
+	var actions slices.StringSlice
+
 	switch event := event.(type) {
 	case *gh.PullRequestEvent:
+		actions = l.Config.PullRequestsConfig.Actions
+		if actions.IsEmpty() {
+			actions.Add("opened")
+		}
+		if actions.HasString(*event.Action) {
+			log.Printf("Pull request event is `%s` - eligible actions are `%v`. Skipping issues labeler", *event.Action, actions)
+			return nil
+		}
 		err = l.runOn(event.PullRequest)
 	case *gh.IssuesEvent:
+		actions = l.Config.IssuesConfig.Actions
+		if actions.IsEmpty() {
+			actions.Add("opened")
+		}
+		if actions.HasString(*event.Action) {
+			log.Printf("Issues event is `%s` - eligible actions are `%v`. Skipping issues labeler", *event.Action, actions)
+			return nil
+		}
 		err = l.runOnIssue(event.Issue)
 	}
 	return err
