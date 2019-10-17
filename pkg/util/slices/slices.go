@@ -13,7 +13,7 @@ func (ss StringSlice) HasString(s string) bool {
 	return false
 }
 
-// IsEmpty returns true if the slice is empty, else false
+// IsEmpty returns true if a string slice is empty, else false
 func (ss StringSlice) IsEmpty() bool {
 	return len(ss) == 0
 }
