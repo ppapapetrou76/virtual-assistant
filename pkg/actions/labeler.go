@@ -35,7 +35,7 @@ func (l *Labeler) HandleEvent(eventName string, payload *[]byte) error {
 		if actions.IsEmpty() {
 			actions.Add("opened")
 		}
-		if actions.HasString(*event.Action) {
+		if !actions.HasString(*event.Action) {
 			log.Printf("Pull request event is `%s` - eligible actions are `%v`. Skipping issues labeler", *event.Action, actions)
 			return nil
 		}
@@ -45,7 +45,7 @@ func (l *Labeler) HandleEvent(eventName string, payload *[]byte) error {
 		if actions.IsEmpty() {
 			actions.Add("opened")
 		}
-		if actions.HasString(*event.Action) {
+		if !actions.HasString(*event.Action) {
 			log.Printf("Issues event is `%s` - eligible actions are `%v`. Skipping issues labeler", *event.Action, actions)
 			return nil
 		}
