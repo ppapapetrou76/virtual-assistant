@@ -2,6 +2,7 @@ package github
 
 import (
 	"errors"
+	"net/http"
 	"reflect"
 	"testing"
 
@@ -9,25 +10,6 @@ import (
 
 	"github.com/ppapapetrou76/virtual-assistant/pkg/testutil"
 )
-
-const listIssueLabelsResponse = `[
-  {
-    "id": 208045946,
-    "node_id": "MDU6TGFiZWwyMDgwNDU5NDY=",
-    "name": "bug",
-    "description": "Something isn't working",
-    "color": "f29513",
-    "default": true
-  },
-  {
-    "id": 208045947,
-    "node_id": "MDU6TGFiZWwyMDgwNDU5NDc=",
-    "name": "enhancement",
-    "description": "New feature or request",
-    "color": "a2eeef",
-    "default": false
-  }
-]`
 
 func TestIssue_CurrentLabels(t *testing.T) {
 	type fields struct {
@@ -43,14 +25,21 @@ func TestIssue_CurrentLabels(t *testing.T) {
 		{
 			name: "should return the issue labels",
 			fields: fields{
-				ghClient: MockGithubClient(200, listIssueLabelsResponse),
+				ghClient: MockGithubClient([]MockResponse{
+					MockListIssueLabelsResponse(),
+				}),
 			},
 			expectedLabels: []string{"bug", "enhancement"},
 		},
 		{
 			name: "should error if labels cannot be loaded",
 			fields: fields{
-				ghClient: MockGithubClient(200, "ok"),
+				ghClient: MockGithubClient([]MockResponse{
+					{
+						StatusCode: http.StatusOK,
+						Response:   "ok",
+					},
+				}),
 			},
 			expectedError: errors.New("invalid character 'o' looking for beginning of value"),
 			wantErr:       true,
@@ -134,16 +123,17 @@ func TestIssue_ReplaceLabels(t *testing.T) {
 			name: "should replace the issue labels",
 			args: args{labels: []string{"bug", "enhancement"}},
 			fields: fields{
-				ghClient: MockGithubClient(200, listIssueLabelsResponse),
+				ghClient: MockGithubClient([]MockResponse{
+					MockListIssueLabelsResponse(),
+				}),
 			},
 		},
 		{
 			name: "should error if labels cannot be replaced",
 			fields: fields{
-				ghClient: MockGithubClient(401, `{
-				  "message": "Bad credentials",
-  				  "documentation_url": "https://developer.github.com/v3"
-				}`),
+				ghClient: MockGithubClient([]MockResponse{
+					UnAuthorizedMockResponse(),
+				}),
 			},
 			expectedError: errors.New("PUT https://api.github.com/repos/ppapapetrou76/virtual-assistant/issues/0/labels: 401 Bad credentials []"),
 			wantErr:       true,
@@ -190,7 +180,9 @@ func TestIssue_AtLeastOne(t *testing.T) {
 				defaultLabel: "label1",
 			},
 			fields: fields{
-				ghClient: MockGithubClient(200, listIssueLabelsResponse),
+				ghClient: MockGithubClient([]MockResponse{
+					MockListIssueLabelsResponse(),
+				}),
 			},
 		},
 		{
@@ -199,7 +191,9 @@ func TestIssue_AtLeastOne(t *testing.T) {
 				labels: []string{"label1"},
 			},
 			fields: fields{
-				ghClient: MockGithubClient(200, listIssueLabelsResponse),
+				ghClient: MockGithubClient([]MockResponse{
+					MockListIssueLabelsResponse(),
+				}),
 			},
 		},
 		{
@@ -209,10 +203,9 @@ func TestIssue_AtLeastOne(t *testing.T) {
 				defaultLabel: "label1",
 			},
 			fields: fields{
-				ghClient: MockGithubClient(401, `{
-				  "message": "Bad credentials",
-  				  "documentation_url": "https://developer.github.com/v3"
-				}`),
+				ghClient: MockGithubClient([]MockResponse{
+					UnAuthorizedMockResponse(),
+				}),
 			},
 			expectedError: errors.New("GET https://api.github.com/repos/ppapapetrou76/virtual-assistant/issues/0/labels: 401 Bad credentials []"),
 			wantErr:       true,
@@ -224,7 +217,9 @@ func TestIssue_AtLeastOne(t *testing.T) {
 				defaultLabel: "label1",
 			},
 			fields: fields{
-				ghClient: MockGithubClient(200, listIssueLabelsResponse),
+				ghClient: MockGithubClient([]MockResponse{
+					MockListIssueLabelsResponse(),
+				}),
 			},
 		},
 		{
@@ -234,7 +229,10 @@ func TestIssue_AtLeastOne(t *testing.T) {
 				defaultLabel: "label1",
 			},
 			fields: fields{
-				ghClient: MockGithubClient(200, listIssueLabelsResponse),
+				ghClient: MockGithubClient([]MockResponse{
+					MockListIssueLabelsResponse(),
+					MockGenericSuccessResponse(),
+				}),
 			},
 		},
 	}
@@ -251,6 +249,114 @@ func TestIssue_AtLeastOne(t *testing.T) {
 				Number: 0,
 			}
 			err := pr.AtLeastOne(tt.args.labels, tt.args.defaultLabel)
+			testutil.AssertError(t, tt.wantErr, tt.expectedError, err)
+		})
+	}
+}
+
+func TestIssue_AddToProject(t *testing.T) {
+	type fields struct {
+		ghClient ClientWrapper
+	}
+	type args struct {
+		projectID int64
+		column    string
+	}
+	tests := []struct {
+		name          string
+		fields        fields
+		args          args
+		wantErr       bool
+		expectedError error
+	}{
+		{
+			name: "should fail to add project if get issue fails",
+			args: args{
+				projectID: 1,
+				column:    "To Do",
+			},
+			fields: fields{
+				ghClient: MockGithubClient([]MockResponse{
+					UnAuthorizedMockResponse(),
+				}),
+			},
+			wantErr:       true,
+			expectedError: errors.New("cannot get issue with number 0. error message : GET https://api.github.com/repos/ppapapetrou76/virtual-assistant/issues/0: 401 Bad credentials []"),
+		},
+		{
+			name: "should fail to add project if list of project columns fails",
+			args: args{
+				projectID: 1,
+				column:    "To Do",
+			},
+			fields: fields{
+				ghClient: MockGithubClient([]MockResponse{
+					MockGetIssueResponse(),
+					UnAuthorizedMockResponse(),
+				}),
+			},
+			wantErr:       true,
+			expectedError: errors.New("cannot get project (1) columns. error message : GET https://api.github.com/projects/1/columns: 401 Bad credentials []"),
+		},
+		{
+			name: "should fail to add project if create project card fails",
+			args: args{
+				projectID: 1,
+				column:    "To Do",
+			},
+			fields: fields{
+				ghClient: MockGithubClient([]MockResponse{
+					MockGetIssueResponse(),
+					MockListProjectColumnsResponse(),
+					UnAuthorizedMockResponse(),
+				}),
+			},
+			wantErr:       true,
+			expectedError: errors.New("cannot add issue (0) to project (1). error message : POST https://api.github.com/projects/columns/367/cards: 401 Bad credentials []"),
+		},
+		{
+			name: "should succeed to add project",
+			args: args{
+				projectID: 1,
+				column:    "To Do",
+			},
+			fields: fields{
+				ghClient: MockGithubClient([]MockResponse{
+					MockGetIssueResponse(),
+					MockListProjectColumnsResponse(),
+					MockGenericSuccessResponse(),
+				}),
+			},
+		},
+		{
+			name: "should fail to add project if the given column doesn't exist in the project columns list",
+			args: args{
+				projectID: 1,
+				column:    "Invalid Column",
+			},
+			fields: fields{
+				ghClient: MockGithubClient([]MockResponse{
+					MockGetIssueResponse(),
+					MockListProjectColumnsResponse(),
+				}),
+			},
+			wantErr:       true,
+			expectedError: errors.New("cannot add issue (0) to project (1). error message : no project columm found with name Invalid Column"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := Repo{
+				GHClient: tt.fields.ghClient,
+				Owner:    "ppapapetrou76",
+				Name:     "virtual-assistant",
+			}
+
+			pr := Issue{
+				Repo:   repo,
+				Number: 0,
+			}
+			err := pr.AddToProject(tt.args.projectID, tt.args.column)
 			testutil.AssertError(t, tt.wantErr, tt.expectedError, err)
 		})
 	}

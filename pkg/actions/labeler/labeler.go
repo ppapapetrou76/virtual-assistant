@@ -6,14 +6,14 @@ import (
 	gh "github.com/google/go-github/v27/github"
 	"github.com/hashicorp/go-multierror"
 
+	"github.com/ppapapetrou76/virtual-assistant/pkg/actions"
 	"github.com/ppapapetrou76/virtual-assistant/pkg/config"
 	"github.com/ppapapetrou76/virtual-assistant/pkg/github"
-	"github.com/ppapapetrou76/virtual-assistant/pkg/util/slices"
 )
 
 // Labeler is the struct to handle auto-labeling of issues, PRs etc.
 type Labeler struct {
-	*config.Config
+	*config.LabelerConfig
 	github.Repo
 }
 
@@ -26,30 +26,15 @@ func (l *Labeler) HandleEvent(eventName string, payload *[]byte) error {
 	if err != nil {
 		return err
 	}
-
-	var actions slices.StringSlice
-
 	switch event := event.(type) {
 	case *gh.PullRequestEvent:
-		actions = l.Config.PullRequestsLabelerConfig.Actions
-		if actions.IsEmpty() {
-			actions.Add("opened")
+		if actions.ShouldRunOnPullRequest(event, l.PullRequestsLabelerConfig.Actions) {
+			err = l.runOn(event.PullRequest)
 		}
-		if !actions.HasString(*event.Action) {
-			log.Printf("Pull request event is `%s` - eligible actions are `%v`. Skipping issues labeler", *event.Action, actions)
-			return nil
-		}
-		err = l.runOn(event.PullRequest)
 	case *gh.IssuesEvent:
-		actions = l.Config.IssuesLabelerConfig.Actions
-		if actions.IsEmpty() {
-			actions.Add("opened")
+		if actions.ShouldRunOnIssue(event, l.PullRequestsLabelerConfig.Actions) {
+			err = l.runOnIssue(event.Issue)
 		}
-		if !actions.HasString(*event.Action) {
-			log.Printf("Issues event is `%s` - eligible actions are `%v`. Skipping issues labeler", *event.Action, actions)
-			return nil
-		}
-		err = l.runOnIssue(event.Issue)
 	}
 	return err
 }
@@ -88,7 +73,7 @@ func (l *Labeler) runOnIssue(i *gh.Issue) error {
 // New creates a new labeler object
 func New(c *config.Config, repo github.Repo) *Labeler {
 	return &Labeler{
-		Config: c,
-		Repo:   repo,
+		LabelerConfig: &c.LabelerConfig,
+		Repo:          repo,
 	}
 }
