@@ -33,33 +33,35 @@ func TestLoad(t *testing.T) {
 				fileName: "../../test_data/valid-config.yml",
 			},
 			expected: &Config{
-				IssuesConfig: IssuesConfig{
-					Labels: []string{
-						"label1",
-						"label2",
-						"area:label3",
-					},
-					Actions: []string{
-						"opened",
-						"milestoned",
-					},
-					OneOfaKind: OneOfaKind{
-						PossibleLabels: []string{
-							"priority:1",
-							"priority:2",
-							"priority:3",
+				LabelerConfig: LabelerConfig{
+					IssuesLabelerConfig: IssuesLabelerConfig{
+						Labels: []string{
+							"label1",
+							"label2",
+							"area:label3",
 						},
-						Default: "priority:2",
+						Actions: []string{
+							"opened",
+							"milestoned",
+						},
+						OneOfaKind: OneOfaKind{
+							PossibleLabels: []string{
+								"priority:1",
+								"priority:2",
+								"priority:3",
+							},
+							Default: "priority:2",
+						},
 					},
-				},
-				PullRequestsConfig: PullRequestsConfig{
-					Labels: []string{
-						"label1",
-						"label2",
-					},
-					Actions: []string{
-						"opened",
-						"synchronize",
+					PullRequestsLabelerConfig: PullRequestsLabelerConfig{
+						Labels: []string{
+							"label1",
+							"label2",
+						},
+						Actions: []string{
+							"opened",
+							"synchronize",
+						},
 					},
 				},
 			},

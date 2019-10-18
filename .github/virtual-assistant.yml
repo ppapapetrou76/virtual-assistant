@@ -1,22 +1,24 @@
-issues:
-  labels:
-    - label1
-    - label2
-    - area:label3
-  actions:
-    - milestoned
-    - opened
-  at-least-one:
+labeler:
+  issues:
     labels:
-      - priority:1
-      - priority:2
-      - priority:3
-    default: priority:2
+      - label1
+      - label2
+      - area:label3
+    actions:
+      - opened
+      - milestoned
+    at-least-one:
+      labels:
+        - priority:1
+        - priority:2
+        - priority:3
+      default: priority:2
 
-pull-requests:
-  labels:
-    - label1
-    - label2
-  actions:
-    - opened
-    - synchronize
+  pull-requests:
+    labels:
+      - label1
+      - label2
+    actions:
+      - opened
+      - synchronize
+

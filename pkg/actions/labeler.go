@@ -3,13 +3,12 @@ package labeler
 import (
 	"log"
 
-	"github.com/ppapapetrou76/virtual-assistant/pkg/util/slices"
-
 	gh "github.com/google/go-github/v27/github"
 	"github.com/hashicorp/go-multierror"
 
 	"github.com/ppapapetrou76/virtual-assistant/pkg/config"
 	"github.com/ppapapetrou76/virtual-assistant/pkg/github"
+	"github.com/ppapapetrou76/virtual-assistant/pkg/util/slices"
 )
 
 // Labeler is the struct to handle auto-labeling of issues, PRs etc.
@@ -32,7 +31,7 @@ func (l *Labeler) HandleEvent(eventName string, payload *[]byte) error {
 
 	switch event := event.(type) {
 	case *gh.PullRequestEvent:
-		actions = l.Config.PullRequestsConfig.Actions
+		actions = l.Config.PullRequestsLabelerConfig.Actions
 		if actions.IsEmpty() {
 			actions.Add("opened")
 		}
@@ -42,7 +41,7 @@ func (l *Labeler) HandleEvent(eventName string, payload *[]byte) error {
 		}
 		err = l.runOn(event.PullRequest)
 	case *gh.IssuesEvent:
-		actions = l.Config.IssuesConfig.Actions
+		actions = l.Config.IssuesLabelerConfig.Actions
 		if actions.IsEmpty() {
 			actions.Add("opened")
 		}
@@ -63,7 +62,7 @@ func (l *Labeler) runOn(pr *gh.PullRequest) error {
 		return err
 	}
 
-	desiredLabels := append(l.PullRequestsConfig.Labels, currLabels...)
+	desiredLabels := append(l.PullRequestsLabelerConfig.Labels, currLabels...)
 	log.Printf("Desired labels: %s", desiredLabels)
 	return pullRequest.ReplaceLabels(desiredLabels)
 }
@@ -76,12 +75,12 @@ func (l *Labeler) runOnIssue(i *gh.Issue) error {
 		return err
 	}
 
-	desiredLabels := append(l.IssuesConfig.Labels, currLabels...)
+	desiredLabels := append(l.IssuesLabelerConfig.Labels, currLabels...)
 	log.Printf("Desired labels: %s", desiredLabels)
 
 	merr := new(multierror.Error)
 	merr = multierror.Append(merr, issue.ReplaceLabels(desiredLabels))
-	merr = multierror.Append(merr, issue.AtLeastOne(l.IssuesConfig.PossibleLabels, l.IssuesConfig.Default))
+	merr = multierror.Append(merr, issue.AtLeastOne(l.IssuesLabelerConfig.PossibleLabels, l.IssuesLabelerConfig.Default))
 
 	return merr.ErrorOrNil()
 }
