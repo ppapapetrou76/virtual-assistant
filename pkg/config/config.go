@@ -11,12 +11,17 @@ import (
 
 // Config is the struct to hold user configuration
 type Config struct {
-	IssuesConfig       `yaml:"issues"`
-	PullRequestsConfig `yaml:"pull-requests"`
+	LabelerConfig `yaml:"labeler"`
 }
 
-// IssuesConfig is the struct to hold user configuration related to issues
-type IssuesConfig struct {
+// LabelerConfig is the struct to hold user configuration
+type LabelerConfig struct {
+	IssuesLabelerConfig       `yaml:"issues"`
+	PullRequestsLabelerConfig `yaml:"pull-requests"`
+}
+
+// IssuesLabelerConfig is the struct to hold user configuration related to issues
+type IssuesLabelerConfig struct {
 	Labels     slices.StringSlice
 	Actions    slices.StringSlice
 	OneOfaKind `yaml:"at-least-one"`
@@ -29,8 +34,8 @@ type OneOfaKind struct {
 	Default        string
 }
 
-// PullRequestsConfig is the struct to hold user configuration related to pull-requests
-type PullRequestsConfig struct {
+// PullRequestsLabelerConfig is the struct to hold user configuration related to pull-requests
+type PullRequestsLabelerConfig struct {
 	Labels  slices.StringSlice
 	Actions slices.StringSlice
 }

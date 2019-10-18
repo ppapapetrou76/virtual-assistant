@@ -146,11 +146,13 @@ func TestLabeler_HandleEvent(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			labeler := Labeler{
 				Config: &config.Config{
-					PullRequestsConfig: config.PullRequestsConfig{
-						Labels: []string{"bug"},
-					},
-					IssuesConfig: config.IssuesConfig{
-						Labels: []string{"feature"},
+					LabelerConfig: config.LabelerConfig{
+						PullRequestsLabelerConfig: config.PullRequestsLabelerConfig{
+							Labels: []string{"bug"},
+						},
+						IssuesLabelerConfig: config.IssuesLabelerConfig{
+							Labels: []string{"feature"},
+						},
 					},
 				},
 				Repo: tt.fields.repo,
