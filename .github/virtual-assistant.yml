@@ -26,7 +26,7 @@ assigner:
   issues:
     project:
       url: https://github.com/ppapapetrou76/virtual-assistant/projects/1
-      column: To Do
+      column: To do
     actions:
       - opened
       - milestoned
