@@ -22,3 +22,11 @@ labeler:
       - opened
       - synchronize
 
+assigner:
+  issues:
+    project:
+      id: 1
+      column: To Do
+    actions:
+      - opened
+      - milestoned

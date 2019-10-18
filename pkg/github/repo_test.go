@@ -2,6 +2,7 @@ package github
 
 import (
 	"errors"
+	"net/http"
 	"os"
 	"reflect"
 	"testing"
@@ -73,14 +74,24 @@ func TestRepo_LoadFile(t *testing.T) {
 		{
 			name: "should return the file contents",
 			fields: fields{
-				ghClient: MockGithubClient(200, getContentResponse),
+				ghClient: MockGithubClient([]MockResponse{
+					{
+						StatusCode: http.StatusOK,
+						Response:   getContentResponse,
+					},
+				}),
 			},
 			expectedContents: []byte("I'm a secret"),
 		},
 		{
 			name: "should error if file cannot be loaded",
 			fields: fields{
-				ghClient: MockGithubClient(200, "ok"),
+				ghClient: MockGithubClient([]MockResponse{
+					{
+						StatusCode: http.StatusOK,
+						Response:   "ok",
+					},
+				}),
 			},
 			expectedError: errors.New("load file : unable to load file from ppapapetrou76/virtual-assistant@/some-file: invalid character 'o' looking for beginning of value"),
 			wantErr:       true,

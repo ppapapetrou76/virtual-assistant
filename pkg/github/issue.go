@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/google/go-github/v27/github"
@@ -16,20 +17,20 @@ type Issue struct {
 }
 
 // ReplaceLabels replace the labels of the issue/pull request with the ones passed as method argument
-func (pr Issue) ReplaceLabels(labels []string) error {
-	log.Printf("Setting labels to %s/%s#%d: %s", pr.Owner, pr.Name, pr.Number, labels)
-	_, _, err := pr.GHClient.Issues.ReplaceLabelsForIssue(
-		context.Background(), pr.Owner, pr.Name, pr.Number, labels)
+func (i Issue) ReplaceLabels(labels []string) error {
+	log.Printf("Setting labels to %s/%s#%d: %s", i.Owner, i.Name, i.Number, labels)
+	_, _, err := i.GHClient.Issues.ReplaceLabelsForIssue(
+		context.Background(), i.Owner, i.Name, i.Number, labels)
 	return err
 }
 
 // AtLeastOne replace the labels of the issue/pull request with the ones passed as method argument
-func (pr Issue) AtLeastOne(labels slices.StringSlice, defaultLabel string) error {
+func (i Issue) AtLeastOne(labels slices.StringSlice, defaultLabel string) error {
 	if labels.IsEmpty() || defaultLabel == "" {
 		return nil
 	}
 
-	currentLabels, err := pr.CurrentLabels()
+	currentLabels, err := i.CurrentLabels()
 	if err != nil {
 		return err
 	}
@@ -39,23 +40,54 @@ func (pr Issue) AtLeastOne(labels slices.StringSlice, defaultLabel string) error
 		}
 	}
 	desiredLabels := append(currentLabels, defaultLabel)
-	log.Printf("Setting labels to %s/%s#%d: %s", pr.Owner, pr.Name, pr.Number, desiredLabels)
-	_, _, err = pr.GHClient.Issues.ReplaceLabelsForIssue(
-		context.Background(), pr.Owner, pr.Name, pr.Number, desiredLabels)
+	log.Printf("Setting labels to %s/%s#%d: %s", i.Owner, i.Name, i.Number, desiredLabels)
+	_, _, err = i.GHClient.Issues.ReplaceLabelsForIssue(
+		context.Background(), i.Owner, i.Name, i.Number, desiredLabels)
 	return err
 }
 
 // CurrentLabels returns the current labels of an issue/pull request
-func (pr Issue) CurrentLabels() (slices.StringSlice, error) {
+func (i Issue) CurrentLabels() (slices.StringSlice, error) {
 	opts := github.ListOptions{}
-	currLabels, _, err := pr.GHClient.Issues.ListLabelsByIssue(
-		context.Background(), pr.Owner, pr.Name, pr.Number, &opts)
+	currLabels, _, err := i.GHClient.Issues.ListLabelsByIssue(
+		context.Background(), i.Owner, i.Name, i.Number, &opts)
 
 	labels := make([]string, 0, len(currLabels))
 	for _, label := range currLabels {
 		labels = append(labels, *label.Name)
 	}
 	return labels, err
+}
+
+// AddToProject adds the issue to the given project. If the project doesn't exist it returns an error
+func (i Issue) AddToProject(projectID int64, column string) error {
+	issue, _, err := i.GHClient.Issues.Get(context.Background(), i.Owner, i.Name, i.Number)
+	if err != nil {
+		return fmt.Errorf("cannot get issue with number %d. error message : %s", i.Number, err.Error())
+	}
+
+	opts := &github.ProjectCardOptions{
+		ContentType: "Issue",
+		ContentID:   *issue.ID,
+	}
+	columns, _, err := i.GHClient.Projects.ListProjectColumns(context.Background(), projectID, &github.ListOptions{})
+	if err != nil {
+		return fmt.Errorf("cannot get project (%d) columns. error message : %s", projectID, err.Error())
+	}
+
+	for _, c := range columns {
+		if *c.Name == column {
+			_, _, err := i.GHClient.Projects.CreateProjectCard(context.Background(), *c.ID, opts)
+			if err != nil {
+				return fmt.Errorf("cannot add issue (%d) to project (%d). error message : %s",
+					i.Number, projectID, err.Error())
+			}
+			return nil
+		}
+	}
+
+	return fmt.Errorf("cannot add issue (%d) to project (%d). error message : no project columm found with name %s",
+		i.Number, projectID, column)
 }
 
 // NewIssue returns a new Issue struct
