@@ -11,16 +11,17 @@ import (
 
 // Config is the struct to hold user configuration
 type Config struct {
-	LabelerConfig `yaml:"labeler"`
+	LabelerConfig  `yaml:"labeler"`
+	AssignerConfig `yaml:"assigner"`
 }
 
-// LabelerConfig is the struct to hold user configuration
+// LabelerConfig is the struct to hold user configuration for the labeler
 type LabelerConfig struct {
 	IssuesLabelerConfig       `yaml:"issues"`
 	PullRequestsLabelerConfig `yaml:"pull-requests"`
 }
 
-// IssuesLabelerConfig is the struct to hold user configuration related to issues
+// IssuesLabelerConfig is the struct to hold user configuration related to issues labeler
 type IssuesLabelerConfig struct {
 	Labels     slices.StringSlice
 	Actions    slices.StringSlice
@@ -34,10 +35,27 @@ type OneOfaKind struct {
 	Default        string
 }
 
-// PullRequestsLabelerConfig is the struct to hold user configuration related to pull-requests
+// PullRequestsLabelerConfig is the struct to hold user configuration related to pull-requests labeler
 type PullRequestsLabelerConfig struct {
 	Labels  slices.StringSlice
 	Actions slices.StringSlice
+}
+
+// AssignerConfig is the struct to hold user configuration for the assigner
+type AssignerConfig struct {
+	IssuesAssignerConfig `yaml:"issues"`
+}
+
+// IssuesAssignerConfig is the struct to hold user configuration related to issues labeler
+type IssuesAssignerConfig struct {
+	IssuesAssignerProjectConfig `yaml:"project"`
+	Actions                     slices.StringSlice
+}
+
+// IssuesAssignerProjectConfig is the struct to hold user configuration related to issues labeler
+type IssuesAssignerProjectConfig struct {
+	ProjectID int64  `yaml:"id"`
+	Column    string `yaml:"column"`
 }
 
 // Load loads config data from raw format to a Config struct

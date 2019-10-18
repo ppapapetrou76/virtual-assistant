@@ -33,6 +33,18 @@ func TestLoad(t *testing.T) {
 				fileName: "../../test_data/valid-config.yml",
 			},
 			expected: &Config{
+				AssignerConfig: AssignerConfig{
+					IssuesAssignerConfig: IssuesAssignerConfig{
+						Actions: []string{
+							"opened",
+							"milestoned",
+						},
+						IssuesAssignerProjectConfig: IssuesAssignerProjectConfig{
+							ProjectID: 1,
+							Column:    "To Do",
+						},
+					},
+				},
 				LabelerConfig: LabelerConfig{
 					IssuesLabelerConfig: IssuesLabelerConfig{
 						Labels: []string{

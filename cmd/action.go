@@ -5,7 +5,10 @@ import (
 	"log"
 	"os"
 
-	labeler "github.com/ppapapetrou76/virtual-assistant/pkg/actions"
+	"github.com/hashicorp/go-multierror"
+
+	"github.com/ppapapetrou76/virtual-assistant/pkg/actions/assigner"
+	"github.com/ppapapetrou76/virtual-assistant/pkg/actions/labeler"
 	"github.com/ppapapetrou76/virtual-assistant/pkg/config"
 	"github.com/ppapapetrou76/virtual-assistant/pkg/github"
 )
@@ -30,8 +33,10 @@ func main() {
 
 	log.Printf("Trigger event: %s", os.Getenv(github.EventNameEnvVar))
 
-	err = labeler.New(cfg, repo).HandleEvent(eventName, eventPayload)
-	checkErr(err)
+	merr := new(multierror.Error)
+	merr = multierror.Append(merr, labeler.New(cfg, repo).HandleEvent(eventName, eventPayload))
+	merr = multierror.Append(merr, assigner.New(cfg, repo).HandleEvent(eventName, eventPayload))
+	checkErr(merr.ErrorOrNil())
 }
 
 func checkErr(err error) {

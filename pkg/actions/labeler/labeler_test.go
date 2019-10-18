@@ -59,11 +59,14 @@ func TestLabeler_HandleEvent(t *testing.T) {
 				eventName: "pull_request",
 			},
 			fields: fields{
-
 				repo: github.Repo{
-					GHClient: github.MockGithubClient(200, ""),
-					Owner:    "ppapapetrou76",
-					Name:     "virtual-assistant",
+					GHClient: github.MockGithubClient([]github.MockResponse{
+						github.MockGenericSuccessResponse(),
+						github.MockGenericSuccessResponse(),
+						github.MockGenericSuccessResponse(),
+					}),
+					Owner: "ppapapetrou76",
+					Name:  "virtual-assistant",
 				},
 			},
 		},
@@ -75,11 +78,14 @@ func TestLabeler_HandleEvent(t *testing.T) {
 				eventName: "issues",
 			},
 			fields: fields{
-
 				repo: github.Repo{
-					GHClient: github.MockGithubClient(200, ""),
-					Owner:    "ppapapetrou76",
-					Name:     "virtual-assistant",
+					GHClient: github.MockGithubClient([]github.MockResponse{
+						github.MockGenericSuccessResponse(),
+						github.MockGenericSuccessResponse(),
+						github.MockGenericSuccessResponse(),
+					}),
+					Owner: "ppapapetrou76",
+					Name:  "virtual-assistant",
 				},
 			},
 		},
@@ -92,10 +98,9 @@ func TestLabeler_HandleEvent(t *testing.T) {
 			},
 			fields: fields{
 				repo: github.Repo{
-					GHClient: github.MockGithubClient(401, `{
-						  "message": "Bad credentials",
-						  "documentation_url": "https://developer.github.com/v3"
-						}`),
+					GHClient: github.MockGithubClient([]github.MockResponse{
+						github.UnAuthorizedMockResponse(),
+					}),
 					Owner: "ppapapetrou76",
 					Name:  "virtual-assistant",
 				},
@@ -112,10 +117,9 @@ func TestLabeler_HandleEvent(t *testing.T) {
 			},
 			fields: fields{
 				repo: github.Repo{
-					GHClient: github.MockGithubClient(401, `{
-						  "message": "Bad credentials",
-						  "documentation_url": "https://developer.github.com/v3"
-						}`),
+					GHClient: github.MockGithubClient([]github.MockResponse{
+						github.UnAuthorizedMockResponse(),
+					}),
 					Owner: "ppapapetrou76",
 					Name:  "virtual-assistant",
 				},
@@ -131,9 +135,8 @@ func TestLabeler_HandleEvent(t *testing.T) {
 				eventName: "pull_request",
 			},
 			fields: fields{
-
 				repo: github.Repo{
-					GHClient: github.MockGithubClient(200, ""),
+					GHClient: github.MockGithubClient([]github.MockResponse{github.MockGenericSuccessResponse()}),
 					Owner:    "ppapapetrou76",
 					Name:     "virtual-assistant",
 				},
@@ -145,14 +148,12 @@ func TestLabeler_HandleEvent(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			labeler := Labeler{
-				Config: &config.Config{
-					LabelerConfig: config.LabelerConfig{
-						PullRequestsLabelerConfig: config.PullRequestsLabelerConfig{
-							Labels: []string{"bug"},
-						},
-						IssuesLabelerConfig: config.IssuesLabelerConfig{
-							Labels: []string{"feature"},
-						},
+				LabelerConfig: &config.LabelerConfig{
+					PullRequestsLabelerConfig: config.PullRequestsLabelerConfig{
+						Labels: []string{"bug"},
+					},
+					IssuesLabelerConfig: config.IssuesLabelerConfig{
+						Labels: []string{"feature"},
 					},
 				},
 				Repo: tt.fields.repo,
