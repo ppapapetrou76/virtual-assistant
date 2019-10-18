@@ -36,7 +36,7 @@ func (l *Assigner) HandleEvent(eventName string, payload *[]byte) error {
 
 func (l *Assigner) runOnIssue(i *gh.Issue) error {
 	issue := github.NewIssue(l.Repo, *i.Number)
-	err := issue.AddToProject(l.AssignerConfig.ProjectID, l.AssignerConfig.Column)
+	err := issue.AddToProject(l.AssignerConfig.ProjectURL, l.AssignerConfig.Column)
 
 	if err != nil {
 		return err

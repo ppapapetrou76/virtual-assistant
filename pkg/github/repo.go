@@ -48,3 +48,24 @@ func (r Repo) LoadFile(file, sha string) (*[]byte, error) {
 	raw := []byte(content)
 	return &raw, nil
 }
+
+// GetProjectID returns the id of a project given its url
+func (r Repo) GetProjectID(projectURL string) (int64, error) {
+	projects, _, err := r.GHClient.Repositories.ListProjects(context.Background(), r.Owner, r.Name, &github.ProjectListOptions{})
+	if err != nil {
+		return 0, fmt.Errorf("cannot get repository (%s/%s) projects. error message : %s", r.Owner, r.Name, err.Error())
+	}
+
+	var projectID int64
+	for _, p := range projects {
+		if *p.HTMLURL == projectURL {
+			projectID = *p.ID
+		}
+	}
+
+	if projectID == 0 {
+		return 0, fmt.Errorf("no repository (%s/%s) projects found from the given url (%s)", r.Owner, r.Name, projectURL)
+	}
+
+	return projectID, nil
+}

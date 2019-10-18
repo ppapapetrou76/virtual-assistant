@@ -60,12 +60,16 @@ func (i Issue) CurrentLabels() (slices.StringSlice, error) {
 }
 
 // AddToProject adds the issue to the given project. If the project doesn't exist it returns an error
-func (i Issue) AddToProject(projectID int64, column string) error {
+func (i Issue) AddToProject(projectURL, column string) error {
 	issue, _, err := i.GHClient.Issues.Get(context.Background(), i.Owner, i.Name, i.Number)
 	if err != nil {
 		return fmt.Errorf("cannot get issue with number %d. error message : %s", i.Number, err.Error())
 	}
 
+	projectID, err := i.Repo.GetProjectID(projectURL)
+	if err != nil {
+		return err
+	}
 	opts := &github.ProjectCardOptions{
 		ContentType: "Issue",
 		ContentID:   *issue.ID,

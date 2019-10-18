@@ -40,8 +40,8 @@ func TestLoad(t *testing.T) {
 							"milestoned",
 						},
 						IssuesAssignerProjectConfig: IssuesAssignerProjectConfig{
-							ProjectID: 1,
-							Column:    "To Do",
+							ProjectURL: "https://github.com/ppapapetrou76/virtual-assistant/projects/1",
+							Column:     "To Do",
 						},
 					},
 				},

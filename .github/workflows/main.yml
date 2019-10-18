@@ -1,4 +1,4 @@
-name: Label PRs
+name: Issues and PR Virtual Assistant
 
 on: [issues, pull_request]
 

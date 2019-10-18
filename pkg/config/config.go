@@ -54,8 +54,8 @@ type IssuesAssignerConfig struct {
 
 // IssuesAssignerProjectConfig is the struct to hold user configuration related to issues labeler
 type IssuesAssignerProjectConfig struct {
-	ProjectID int64  `yaml:"id"`
-	Column    string `yaml:"column"`
+	ProjectURL string `yaml:"url"`
+	Column     string `yaml:"column"`
 }
 
 // Load loads config data from raw format to a Config struct

@@ -47,6 +47,7 @@ func TestAssigner_HandleEvent(t *testing.T) {
 				repo: github.Repo{
 					GHClient: github.MockGithubClient([]github.MockResponse{
 						github.MockGetIssueResponse(),
+						github.MockLisRepositoryProjectsResponse(),
 						github.MockListProjectColumnsResponse(),
 						github.MockGenericSuccessResponse(),
 					}),
@@ -97,8 +98,8 @@ func TestAssigner_HandleEvent(t *testing.T) {
 				AssignerConfig: &config.AssignerConfig{
 					IssuesAssignerConfig: config.IssuesAssignerConfig{
 						IssuesAssignerProjectConfig: config.IssuesAssignerProjectConfig{
-							ProjectID: 1,
-							Column:    "To Do",
+							ProjectURL: "https://github.com/ppapapetrou76/virtual-assistant/projects/1",
+							Column:     "To Do",
 						},
 						Actions: []string{"opened"},
 					},

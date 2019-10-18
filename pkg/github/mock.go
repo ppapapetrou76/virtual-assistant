@@ -47,6 +47,20 @@ const listIssueLabelsResponse = `[
   }
 ]`
 
+const listRepositoryProjectsResponse = `[
+  {
+    "owner_url": "https://api.github.com/repos/api-playground/projects-test",
+    "html_url": "https://github.com/ppapapetrou76/virtual-assistant/projects/1",
+    "columns_url": "https://api.github.com/projects/1002604/columns",
+    "id": 1002604,
+    "node_id": "MDc6UHJvamVjdDEwMDI2MDQ=",
+    "name": "Projects Documentation",
+    "body": "Developer documentation project for the developer site.",
+    "number": 1,
+    "state": "open"
+  }
+]`
+
 // MockResponse mocks an http response
 type MockResponse struct {
 	StatusCode int
@@ -126,6 +140,14 @@ func MockListProjectColumnsResponse() MockResponse {
 	return MockResponse{
 		StatusCode: http.StatusOK,
 		Response:   listProjectColumnsResponse,
+	}
+}
+
+// MockLisRepositoryProjectsResponse returns a mock response for the list repository projects call
+func MockLisRepositoryProjectsResponse() MockResponse {
+	return MockResponse{
+		StatusCode: http.StatusOK,
+		Response:   listRepositoryProjectsResponse,
 	}
 }
 
