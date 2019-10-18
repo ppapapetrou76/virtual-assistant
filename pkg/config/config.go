@@ -46,13 +46,13 @@ type AssignerConfig struct {
 	IssuesAssignerConfig `yaml:"issues"`
 }
 
-// IssuesLabelerConfig is the struct to hold user configuration related to issues labeler
+// IssuesAssignerConfig is the struct to hold user configuration related to issues labeler
 type IssuesAssignerConfig struct {
 	IssuesAssignerProjectConfig `yaml:"project"`
 	Actions                     slices.StringSlice
 }
 
-// IssuesLabelerConfig is the struct to hold user configuration related to issues labeler
+// IssuesAssignerProjectConfig is the struct to hold user configuration related to issues labeler
 type IssuesAssignerProjectConfig struct {
 	ProjectID int64  `yaml:"id"`
 	Column    string `yaml:"column"`

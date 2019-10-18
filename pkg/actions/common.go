@@ -8,6 +8,7 @@ import (
 	"github.com/ppapapetrou76/virtual-assistant/pkg/util/slices"
 )
 
+// ShouldRunOnIssue returns true if the action should run on a given issues event and user defined actions
 func ShouldRunOnIssue(event *github.IssuesEvent, configuredActions slices.StringSlice) bool {
 	if addDefaultIfEmpty(configuredActions).HasString(*event.Action) {
 		return true
@@ -16,6 +17,7 @@ func ShouldRunOnIssue(event *github.IssuesEvent, configuredActions slices.String
 	return false
 }
 
+// ShouldRunOnPullRequest returns true if the action should run on a given pull request event and user defined actions
 func ShouldRunOnPullRequest(event *github.PullRequestEvent, configuredActions slices.StringSlice) bool {
 	if addDefaultIfEmpty(configuredActions).HasString(*event.Action) {
 		return true

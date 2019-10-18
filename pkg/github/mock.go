@@ -47,6 +47,7 @@ const listIssueLabelsResponse = `[
   }
 ]`
 
+// MockResponse mocks an http response
 type MockResponse struct {
 	StatusCode int
 	Response   string
@@ -93,6 +94,7 @@ func (m *MockRoundTripper) nextResponse() MockResponse {
 	return r
 }
 
+// UnAuthorizedMockResponse returns a mock response with a 401 error code and message
 func UnAuthorizedMockResponse() MockResponse {
 	return MockResponse{
 		StatusCode: http.StatusUnauthorized,
@@ -103,6 +105,7 @@ func UnAuthorizedMockResponse() MockResponse {
 	}
 }
 
+// MockListIssueLabelsResponse returns a mock response for the list issue labels call
 func MockListIssueLabelsResponse() MockResponse {
 	return MockResponse{
 		StatusCode: http.StatusOK,
@@ -110,6 +113,7 @@ func MockListIssueLabelsResponse() MockResponse {
 	}
 }
 
+// MockGetIssueResponse returns a mock response for the get issue call
 func MockGetIssueResponse() MockResponse {
 	return MockResponse{
 		StatusCode: http.StatusOK,
@@ -117,6 +121,7 @@ func MockGetIssueResponse() MockResponse {
 	}
 }
 
+// MockListProjectColumnsResponse returns a mock response for the list project columns call
 func MockListProjectColumnsResponse() MockResponse {
 	return MockResponse{
 		StatusCode: http.StatusOK,
@@ -124,6 +129,7 @@ func MockListProjectColumnsResponse() MockResponse {
 	}
 }
 
+// MockGenericSuccessResponse returns a generic success mock response
 func MockGenericSuccessResponse() MockResponse {
 	return MockResponse{
 		StatusCode: http.StatusOK,
