@@ -56,6 +56,16 @@ func (r Repo) GetProjectID(projectURL string) (int64, error) {
 		return 0, fmt.Errorf("cannot get repository (%s/%s) projects. error message : %s", r.Owner, r.Name, err.Error())
 	}
 
+	var orgProjects []*github.Project
+	if strings.Contains(projectURL, "orgs") {
+		orgProjects, _, err = r.GHClient.Organizations.ListProjects(context.Background(), r.Owner, &github.ProjectListOptions{})
+		if err != nil {
+			return 0, fmt.Errorf("cannot get organization (%s) projects. error message : %s", r.Owner, err.Error())
+		}
+	}
+
+	projects = append(projects, orgProjects...)
+
 	var projectID int64
 	for _, p := range projects {
 		if *p.HTMLURL == projectURL {
@@ -64,7 +74,7 @@ func (r Repo) GetProjectID(projectURL string) (int64, error) {
 	}
 
 	if projectID == 0 {
-		return 0, fmt.Errorf("no repository (%s/%s) projects found from the given url (%s)", r.Owner, r.Name, projectURL)
+		return 0, fmt.Errorf("no repository/organization (%s/%s) projects found from the given url (%s)", r.Owner, r.Name, projectURL)
 	}
 
 	return projectID, nil

@@ -257,6 +257,7 @@ func TestIssue_AtLeastOne(t *testing.T) {
 func TestIssue_AddToProject(t *testing.T) {
 	type fields struct {
 		ghClient ClientWrapper
+		owner    string
 	}
 	type args struct {
 		ProjectURL string
@@ -276,6 +277,7 @@ func TestIssue_AddToProject(t *testing.T) {
 				column:     "To Do",
 			},
 			fields: fields{
+				owner: "ppapapetrou76",
 				ghClient: MockGithubClient([]MockResponse{
 					UnAuthorizedMockResponse(),
 				}),
@@ -284,12 +286,13 @@ func TestIssue_AddToProject(t *testing.T) {
 			expectedError: errors.New("cannot get issue with number 0. error message : GET https://api.github.com/repos/ppapapetrou76/virtual-assistant/issues/0: 401 Bad credentials []"),
 		},
 		{
-			name: "should fail to add project if list of projects fails",
+			name: "should fail to add project if list of repository projects fails",
 			args: args{
 				ProjectURL: "https://github.com/ppapapetrou76/virtual-assistant/projects/1",
 				column:     "To Do",
 			},
 			fields: fields{
+				owner: "ppapapetrou76",
 				ghClient: MockGithubClient([]MockResponse{
 					MockGetIssueResponse(),
 					UnAuthorizedMockResponse(),
@@ -299,15 +302,33 @@ func TestIssue_AddToProject(t *testing.T) {
 			expectedError: errors.New("cannot get repository (ppapapetrou76/virtual-assistant) projects. error message : GET https://api.github.com/repos/ppapapetrou76/virtual-assistant/projects: 401 Bad credentials []"),
 		},
 		{
+			name: "should fail to add project if list of organization projects fails",
+			args: args{
+				ProjectURL: "https://github.com/orgs/myorg/projects/1",
+				column:     "To Do",
+			},
+			fields: fields{
+				owner: "ppapapetrou76",
+				ghClient: MockGithubClient([]MockResponse{
+					MockGetIssueResponse(),
+					MockListRepositoryProjectsResponse(),
+					UnAuthorizedMockResponse(),
+				}),
+			},
+			wantErr:       true,
+			expectedError: errors.New("cannot get organization (ppapapetrou76) projects. error message : GET https://api.github.com/orgs/ppapapetrou76/projects: 401 Bad credentials []"),
+		},
+		{
 			name: "should fail to add project if list of project cards fails",
 			args: args{
 				ProjectURL: "https://github.com/ppapapetrou76/virtual-assistant/projects/1",
 				column:     "To Do",
 			},
 			fields: fields{
+				owner: "ppapapetrou76",
 				ghClient: MockGithubClient([]MockResponse{
 					MockGetIssueResponse(),
-					MockLisRepositoryProjectsResponse(),
+					MockListRepositoryProjectsResponse(),
 					UnAuthorizedMockResponse(),
 				}),
 			},
@@ -321,9 +342,10 @@ func TestIssue_AddToProject(t *testing.T) {
 				column:     "To Do",
 			},
 			fields: fields{
+				owner: "ppapapetrou76",
 				ghClient: MockGithubClient([]MockResponse{
 					MockGetIssueResponse(),
-					MockLisRepositoryProjectsResponse(),
+					MockListRepositoryProjectsResponse(),
 					MockListProjectColumnsResponse(),
 					UnAuthorizedMockResponse(),
 				}),
@@ -332,15 +354,33 @@ func TestIssue_AddToProject(t *testing.T) {
 			expectedError: errors.New("cannot add issue (0) to project (1002604). error message : POST https://api.github.com/projects/columns/367/cards: 401 Bad credentials []"),
 		},
 		{
-			name: "should succeed to add project",
+			name: "should succeed to add personal project",
 			args: args{
 				ProjectURL: "https://github.com/ppapapetrou76/virtual-assistant/projects/1",
 				column:     "To Do",
 			},
 			fields: fields{
+				owner: "ppapapetrou76",
 				ghClient: MockGithubClient([]MockResponse{
 					MockGetIssueResponse(),
-					MockLisRepositoryProjectsResponse(),
+					MockListRepositoryProjectsResponse(),
+					MockListProjectColumnsResponse(),
+					MockGenericSuccessResponse(),
+				}),
+			},
+		},
+		{
+			name: "should succeed to add organizational project",
+			args: args{
+				ProjectURL: "https://github.com/orgs/myorg/projects/1",
+				column:     "To Do",
+			},
+			fields: fields{
+				owner: "ppapapetrou76",
+				ghClient: MockGithubClient([]MockResponse{
+					MockGetIssueResponse(),
+					MockListRepositoryProjectsResponse(),
+					MockListOrganizationProjectsResponse(),
 					MockListProjectColumnsResponse(),
 					MockGenericSuccessResponse(),
 				}),
@@ -353,14 +393,34 @@ func TestIssue_AddToProject(t *testing.T) {
 				column:     "Invalid Column",
 			},
 			fields: fields{
+				owner: "ppapapetrou76",
 				ghClient: MockGithubClient([]MockResponse{
 					MockGetIssueResponse(),
-					MockLisRepositoryProjectsResponse(),
+					MockListRepositoryProjectsResponse(),
 					MockListProjectColumnsResponse(),
 				}),
 			},
 			wantErr:       true,
-			expectedError: errors.New("cannot add issue (0) to project (1002604). error message : no project columm found with name Invalid Column"),
+			expectedError: errors.New("cannot add issue (0) to project (1002604). error message : no project column found with name Invalid Column"),
+		},
+		{
+			name: "should fail if no projects are found",
+			args: args{
+				ProjectURL: "https://github.com/orgs/myorg/projects/1",
+				column:     "To Do",
+			},
+			fields: fields{
+				owner: "myorg",
+				ghClient: MockGithubClient([]MockResponse{
+					MockGetIssueResponse(),
+					MockListEmptyProjectsResponse(),
+					MockListEmptyProjectsResponse(),
+					MockListProjectColumnsResponse(),
+					MockGenericSuccessResponse(),
+				}),
+			},
+			wantErr:       true,
+			expectedError: errors.New("no repository/organization (ppapapetrou76/virtual-assistant) projects found from the given url (https://github.com/orgs/myorg/projects/1)"),
 		},
 	}
 	for _, tt := range tests {

@@ -91,7 +91,7 @@ func (i Issue) AddToProject(projectURL, column string) error {
 		}
 	}
 
-	return fmt.Errorf("cannot add issue (%d) to project (%d). error message : no project columm found with name %s",
+	return fmt.Errorf("cannot add issue (%d) to project (%d). error message : no project column found with name %s",
 		i.Number, projectID, column)
 }
 

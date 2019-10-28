@@ -47,7 +47,7 @@ func TestAssigner_HandleEvent(t *testing.T) {
 				repo: github.Repo{
 					GHClient: github.MockGithubClient([]github.MockResponse{
 						github.MockGetIssueResponse(),
-						github.MockLisRepositoryProjectsResponse(),
+						github.MockListRepositoryProjectsResponse(),
 						github.MockListProjectColumnsResponse(),
 						github.MockGenericSuccessResponse(),
 					}),

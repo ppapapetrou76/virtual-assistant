@@ -61,6 +61,21 @@ const listRepositoryProjectsResponse = `[
   }
 ]`
 
+const listOrganizationProjectsResponse = `[
+  {
+    "owner_url": "https://api.github.com/repos/api-playground/projects-test",
+    "html_url": "https://github.com/orgs/myorg/projects/1",
+    "columns_url": "https://api.github.com/projects/9999/columns",
+    "id": 9999,
+    "node_id": "MDc6UHJvamVjdDEwMDI2MDQ=",
+    "name": "Projects Documentation",
+    "body": "Developer documentation project for the developer site.",
+    "number": 1,
+    "state": "open"
+  }
+]`
+const listEmptyProjectsResponse = `[]`
+
 // MockResponse mocks an http response
 type MockResponse struct {
 	StatusCode int
@@ -143,11 +158,27 @@ func MockListProjectColumnsResponse() MockResponse {
 	}
 }
 
-// MockLisRepositoryProjectsResponse returns a mock response for the list repository projects call
-func MockLisRepositoryProjectsResponse() MockResponse {
+// MockListRepositoryProjectsResponse returns a mock response for the list repository projects call
+func MockListRepositoryProjectsResponse() MockResponse {
 	return MockResponse{
 		StatusCode: http.StatusOK,
 		Response:   listRepositoryProjectsResponse,
+	}
+}
+
+// MockListOrganizationProjectsResponse returns a mock response for the list organization projects call
+func MockListOrganizationProjectsResponse() MockResponse {
+	return MockResponse{
+		StatusCode: http.StatusOK,
+		Response:   listOrganizationProjectsResponse,
+	}
+}
+
+// MockListEmptyProjectsResponse returns a mock response with an empty projects list
+func MockListEmptyProjectsResponse() MockResponse {
+	return MockResponse{
+		StatusCode: http.StatusOK,
+		Response:   listEmptyProjectsResponse,
 	}
 }
 
