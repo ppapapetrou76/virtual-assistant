@@ -34,6 +34,11 @@ contents:
 Then, add a `./github/virtual-assistant.yml` with the configuration as described
 below.
 
+if you use repository-based projects, `${{ secrets.GITHUB_TOKEN }}` provides appropriate access privileges to this GitHub action. For organization-based projects the default GitHub token might not be enough so you need to follow these steps
+1. [Create](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) a new personal github access token by enabling `repo` and `admin:org` permissions. Copy the value of the created token
+2. Create a new project secret under ( `https://github.com/elastic/YOUR_PROJECT/settings/secrets` ). Name it as you want (for instance `ACTIONS_TOKEN`) and paste the value of the personal access token you created in step 1.
+3. Replace `${{ secrets.GITHUB_TOKEN }}` with `${{ secrets.ACTIONS_TOKEN }}` in your yml configuration
+
 ## Configuration
 
 Configuration can be stored at `./github/virtual-assistant.yml` as below
