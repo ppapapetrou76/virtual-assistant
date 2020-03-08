@@ -48,10 +48,13 @@ The `labels` property accepts a list of labels and these labels will be added to
 The `actions` property accepts a list of event actions to trigger the labeler
 The `at-least-one` property accepts a list of labels and a default label. 
 
-The assigner action can be configured for issues
+The assigner action can be configured for issues as below
 The `project` property is composed of a `url` property which is the url of your project (just grab it from your browser)
 and a `column` property which is the name of your project column (case sensitive)
 
+The assigner action can be configured for pull requests as below
+The `actions` property accepts a list of event actions to trigger the assigner
+The `assignee` property accepts a property `auto` with the values `false` or `true`. If it's set to `true` then the user who created the pr will be assigned to the pr
 
     labeler:
       issues:
@@ -78,6 +81,12 @@ and a `column` property which is the name of your project column (case sensitive
           - synchronize
     
     assigner:
+      pull-requests:
+        assignee:
+          auto: true
+        actions:
+          - opened
+          - synchronize
       issues:
         project:
           url: https://github.com/ppapapetrou76/virtual-assistant/projects/1
@@ -93,6 +102,7 @@ For example, given the above configuration
 
 the action will 
 - add to all new pull request the labels : `label1` and `label2`
+- assign all new pull request to the user who created the pull request
 - add to all new issues the labels : `label1`,`label2` and `area:label3`
 - check all new issues if at least one of the labels `priority:1`,`priority:2`,`priority:3` exists and if not it will add the label `priority:2`
 - add all new issues to the project with number `1` under the column `To do`
