@@ -53,7 +53,7 @@ type PullRequestsAssignerConfig struct {
 	Actions  slices.StringSlice
 }
 
-// IssuesAssignerProjectConfig is the struct to hold user configuration related to issues labeler
+// PullRequestsAutoAssigneeConfig is the struct to hold user configuration related to issues labeler
 type PullRequestsAutoAssigneeConfig struct {
 	Auto bool `yaml:"auto"`
 }
