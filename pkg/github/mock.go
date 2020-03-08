@@ -12,7 +12,11 @@ const getIssueResponse = `{
   "number": 1347,
   "state": "open",
   "title": "Found a bug",
-  "body": "I'm having a problem with this."
+  "body": "I'm having a problem with this.",
+  "user": {
+    "login": "ppapapetrou76",
+    "id": 1
+  }
 }
 `
 const listProjectColumnsResponse = `[

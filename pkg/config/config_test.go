@@ -34,6 +34,15 @@ func TestLoad(t *testing.T) {
 			},
 			expected: &Config{
 				AssignerConfig: AssignerConfig{
+					PullRequestsAssignerConfig: PullRequestsAssignerConfig{
+						Assignee: PullRequestsAutoAssigneeConfig{
+							Auto: true,
+						},
+						Actions: []string{
+							"opened",
+							"synchronize",
+						},
+					},
 					IssuesAssignerConfig: IssuesAssignerConfig{
 						Actions: []string{
 							"opened",
