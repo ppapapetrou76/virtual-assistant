@@ -23,6 +23,12 @@ labeler:
       - synchronize
 
 assigner:
+  pull-requests:
+    assignee:
+      auto: true
+    actions:
+      - opened
+      - synchronize
   issues:
     project:
       url: https://github.com/ppapapetrou76/virtual-assistant/projects/1

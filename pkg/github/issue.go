@@ -59,6 +59,16 @@ func (i Issue) CurrentLabels() (slices.StringSlice, error) {
 	return labels, err
 }
 
+func (i Issue) AddAssignee() error {
+	log.Printf("Assigning the PR/Issue to the user who created it")
+	issue, _, err := i.GHClient.Issues.Get(context.Background(), i.Owner, i.Name, i.Number)
+	if err != nil {
+		return fmt.Errorf("cannot get issue with number %d. error message : %s", i.Number, err.Error())
+	}
+	_, _, err = i.GHClient.Issues.AddAssignees(context.Background(), i.Owner, i.Name, i.Number, []string{*issue.User.Login})
+	return err
+}
+
 // AddToProject adds the issue to the given project. If the project doesn't exist it returns an error
 func (i Issue) AddToProject(projectURL, column string) error {
 	log.Printf("Adding to project %s in column %s", projectURL, column)

@@ -25,7 +25,9 @@ func (l *Assigner) HandleEvent(eventName string, payload *[]byte) error {
 	}
 	switch event := event.(type) {
 	case *gh.PullRequestEvent:
-		// Todo : Implement pull request event handler
+		if actions.ShouldRunOnPullRequest(event, l.IssuesAssignerConfig.Actions) {
+			err = l.runOnPR(event.PullRequest)
+		}
 	case *gh.IssuesEvent:
 		if actions.ShouldRunOnIssue(event, l.IssuesAssignerConfig.Actions) {
 			err = l.runOnIssue(event.Issue)
@@ -34,15 +36,17 @@ func (l *Assigner) HandleEvent(eventName string, payload *[]byte) error {
 	return err
 }
 
+func (l *Assigner) runOnPR(i *gh.PullRequest) error {
+	issue := github.NewIssue(l.Repo, *i.Number)
+	if !l.Assignee.Auto {
+		return nil
+	}
+	return issue.AddAssignee()
+}
+
 func (l *Assigner) runOnIssue(i *gh.Issue) error {
 	issue := github.NewIssue(l.Repo, *i.Number)
-	err := issue.AddToProject(l.AssignerConfig.ProjectURL, l.AssignerConfig.Column)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return issue.AddToProject(l.AssignerConfig.ProjectURL, l.AssignerConfig.Column)
 }
 
 // New creates a new labeler object

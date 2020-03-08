@@ -440,3 +440,63 @@ func TestIssue_AddToProject(t *testing.T) {
 		})
 	}
 }
+
+func TestIssue_AddAssignee(t *testing.T) {
+	type fields struct {
+		ghClient ClientWrapper
+	}
+	tests := []struct {
+		name           string
+		fields         fields
+		wantErr        bool
+		expectedError  error
+		expectedLabels []string
+	}{
+		{
+			name: "should fail to add project if get issue fails",
+			fields: fields{
+				ghClient: MockGithubClient([]MockResponse{
+					UnAuthorizedMockResponse(),
+				}),
+			},
+			wantErr:       true,
+			expectedError: errors.New("cannot get issue with number 0. error message : GET https://api.github.com/repos/ppapapetrou76/virtual-assistant/issues/0: 401 Bad credentials []"),
+		},
+		{
+			name: "should add the assignee",
+			fields: fields{
+				ghClient: MockGithubClient([]MockResponse{
+					MockGetIssueResponse(),
+					MockGetIssueResponse(),
+				}),
+			},
+		},
+		{
+			name: "should error if adding the assignee fails",
+			fields: fields{
+				ghClient: MockGithubClient([]MockResponse{
+					MockGetIssueResponse(),
+					UnAuthorizedMockResponse(),
+				}),
+			},
+			expectedError: errors.New("POST https://api.github.com/repos/ppapapetrou76/virtual-assistant/issues/0/assignees: 401 Bad credentials []"),
+			wantErr:       true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := Repo{
+				GHClient: tt.fields.ghClient,
+				Owner:    "ppapapetrou76",
+				Name:     "virtual-assistant",
+			}
+
+			pr := Issue{
+				Repo:   repo,
+				Number: 0,
+			}
+			err := pr.AddAssignee()
+			testutil.AssertError(t, tt.wantErr, tt.expectedError, err)
+		})
+	}
+}

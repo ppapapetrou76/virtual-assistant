@@ -43,7 +43,19 @@ type PullRequestsLabelerConfig struct {
 
 // AssignerConfig is the struct to hold user configuration for the assigner
 type AssignerConfig struct {
-	IssuesAssignerConfig `yaml:"issues"`
+	IssuesAssignerConfig       `yaml:"issues"`
+	PullRequestsAssignerConfig `yaml:"pull-requests"`
+}
+
+// PullRequestsAssignerConfig is the struct to hold user configuration related to issues labeler
+type PullRequestsAssignerConfig struct {
+	Assignee PullRequestsAutoAssigneeConfig `yaml:"assignee"`
+	Actions  slices.StringSlice
+}
+
+// IssuesAssignerProjectConfig is the struct to hold user configuration related to issues labeler
+type PullRequestsAutoAssigneeConfig struct {
+	Auto bool `yaml:"auto"`
 }
 
 // IssuesAssignerConfig is the struct to hold user configuration related to issues labeler
