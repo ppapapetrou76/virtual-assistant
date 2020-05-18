@@ -30,6 +30,8 @@ linters:
     # should be enabled shortly
     - funlen
     - dupl
+    - gomnd
+    - wsl
 
 linters-settings:
   govet:

@@ -59,6 +59,7 @@ func (i Issue) CurrentLabels() (slices.StringSlice, error) {
 	return labels, err
 }
 
+// AddAssignee adds the user who created the issue/PR as assignee
 func (i Issue) AddAssignee() error {
 	log.Printf("Assigning the PR/Issue to the user who created it")
 	issue, _, err := i.GHClient.Issues.Get(context.Background(), i.Owner, i.Name, i.Number)
