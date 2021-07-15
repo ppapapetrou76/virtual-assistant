@@ -1,4 +1,4 @@
-FROM golang:1.16.5-alpine
+FROM golang:1.16.6-alpine
 
 LABEL "com.github.actions.name"="Issue and Pull Request virtual assistant"
 LABEL "com.github.actions.description"="Automates tasks on pull requests and issues actions"
